@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice OCR Console</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --surface: #ffffff;
+      --surface-2: #f8f9fc;
+      --text: #172033;
+      --muted: #66708a;
+      --border: #e1e5ee;
+      --accent: #2557d6;
+      --accent-soft: #e6edfc;
+      --accent-text: #ffffff;
+      --ok: #137a45;
+      --ok-soft: #e0f5ea;
+      --warn: #a15c00;
+      --warn-soft: #fdf0d8;
+      --danger: #b42318;
+      --danger-soft: #fde8e6;
+      --sidebar: #111a2e;
+      --sidebar-text: #aeb8d0;
+      --sidebar-active: #1d2a47;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0c111d;
+        --surface: #151c2c;
+        --surface-2: #1a2236;
+        --text: #e8ecf5;
+        --muted: #93a0bd;
+        --border: #263049;
+        --accent: #5b8cff;
+        --accent-soft: #1c2a4d;
+        --accent-text: #0c111d;
+        --ok: #4ade9b;
+        --ok-soft: #12301f;
+        --warn: #f5b84c;
+        --warn-soft: #33260c;
+        --danger: #ff8a80;
+        --danger-soft: #3a1714;
+        --sidebar: #090e19;
+        --sidebar-active: #172038;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    button { font-family: inherit; }
+
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100%; }
+    @media (max-width: 860px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--sidebar);
+      color: var(--sidebar-text);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 22px; color: #fff; }
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #3b6cf0, #7aa2ff);
+      display: grid; place-items: center; font-weight: 700; font-size: 15px;
+    }
+    .brand b { display: block; font-size: 15px; }
+    .brand small { color: var(--sidebar-text); font-size: 12px; }
+    .nav-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 8px 10px; opacity: .7; }
+    .nav-item {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; border: 0; background: transparent; color: inherit;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; text-align: left;
+    }
+    .nav-item:hover { background: var(--sidebar-active); color: #fff; }
+    .nav-item.active { background: var(--sidebar-active); color: #fff; font-weight: 600; }
+    .badge { background: var(--accent); color: var(--accent-text); border-radius: 999px; font-size: 11px; padding: 1px 8px; font-weight: 700; }
+    .sidebar-foot { margin-top: auto; font-size: 12px; padding: 10px; border-top: 1px solid #202c47; }
+    .sidebar-foot b { color: #fff; }
+
+    /* Main */
+    .main { min-width: 0; display: flex; flex-direction: column; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px; background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .topbar h1 { font-size: 18px; margin: 0; }
+    .topbar p { margin: 0; color: var(--muted); font-size: 13px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+    .chip.running { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+    .chip.done { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .chip.running .dot { animation: pulse 1.2s infinite; }
+    @keyframes pulse { 50% { opacity: .25; } }
+
+    .content { padding: 24px 28px 90px; max-width: 1280px; width: 100%; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 20px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .card-head h2 { font-size: 15px; margin: 0; }
+    .card-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+    .card-body { padding: 20px; }
+    .step { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; margin-right: 8px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn:hover:not(:disabled) { background: var(--surface-2); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+    .btn.primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--accent); }
+    .btn.lg { padding: 11px 22px; font-size: 14px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+
+    /* Model picker */
+    .models { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+    .model {
+      position: relative; text-align: left; border: 1.5px solid var(--border); background: var(--surface);
+      border-radius: 10px; padding: 14px; cursor: pointer; color: var(--text); transition: border-color .15s, background .15s;
+    }
+    .model:hover:not(:disabled) { border-color: var(--accent); }
+    .model.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .model:disabled { opacity: .4; cursor: not-allowed; }
+    .model .name { font-weight: 700; font-size: 14px; }
+    .model .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .model .tick {
+      position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; border-radius: 50%;
+      border: 1.5px solid var(--border); display: grid; place-items: center; font-size: 12px; color: transparent;
+    }
+    .model.selected .tick { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+    .counter { font-weight: 700; color: var(--accent); }
+    .model.disabled { opacity: .4; cursor: not-allowed; }
+    .model-actions { display: flex; gap: 2px; margin-top: 10px; }
+    .icon-btn { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+    .icon-btn.danger:hover { color: var(--danger); background: var(--danger-soft); }
+    .model.new { border-style: dashed; display: grid; place-items: center; color: var(--accent); font-weight: 700; min-height: 84px; }
+    .row-del { padding: 3px 8px; font-size: 12px; }
+    .row-del:hover { color: var(--danger) !important; }
+
+    /* Modal */
+    .modal-wrap { position: fixed; inset: 0; z-index: 30; background: rgba(8, 12, 22, .5); display: grid; place-items: center; padding: 16px; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; width: min(980px, 100%); max-height: 92vh; overflow: auto; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+    .modal h3 { margin: 0 0 14px; font-size: 17px; }
+    .modal label { display: block; font-weight: 600; margin-bottom: 12px; }
+    .modal input, .modal textarea {
+      display: block; width: 100%; margin-top: 6px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface-2); color: var(--text); font: inherit; font-weight: 400;
+    }
+    .modal textarea { font-family: Consolas, "Courier New", monospace; font-size: 12.5px; resize: vertical; }
+    .modal .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
+    /* Upload panels */
+    .panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+    @media (max-width: 480px) { .panels { grid-template-columns: 1fr; } }
+    .panel { border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .panel-head b { font-size: 14px; }
+    .panel-count { color: var(--muted); font-size: 12px; }
+    .drop {
+      margin: 14px; border: 2px dashed var(--border); border-radius: 10px; padding: 22px 12px; text-align: center;
+      color: var(--muted); cursor: pointer; background: var(--surface); transition: border-color .15s, background .15s;
+    }
+    .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+    .drop strong { color: var(--accent); }
+    .drop small { display: block; margin-top: 4px; }
+    .filelist { max-height: 180px; overflow: auto; margin: 0 14px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+    .file { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .file:last-child { border-bottom: 0; }
+    .file span.n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; }
+    .file button:hover { color: var(--danger); }
+    .empty { text-align: center; color: var(--muted); padding: 34px 10px; }
+
+    /* Sticky action bar */
+    .actionbar {
+      position: fixed; bottom: 0; left: 232px; right: 0; z-index: 6;
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    @media (max-width: 860px) { .actionbar { left: 0; } }
+    .actionbar .sum { color: var(--muted); }
+    .actionbar .sum b { color: var(--text); }
+
+    /* Progress */
+    .bar { height: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+    .bar.ok > i { background: var(--ok); }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
+    .kpi small { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: .05em; }
+    .kpi div { font-size: 26px; font-weight: 700; margin-top: 4px; }
+    .kpi.ok div { color: var(--ok); }
+    .kpi.err div { color: var(--danger); }
+    .modelbars { display: grid; gap: 12px; margin-top: 14px; }
+    .mbar-row { display: grid; grid-template-columns: 150px 1fr 110px; gap: 12px; align-items: center; }
+    .mbar-row span { color: var(--muted); font-size: 12.5px; text-align: right; }
+    @media (max-width: 600px) { .mbar-row { grid-template-columns: 1fr; } .mbar-row span { text-align: left; } }
+
+    /* Table */
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--border); align-items: center; }
+    .toolbar input, .toolbar select {
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font-size: 13px;
+    }
+    .toolbar input { min-width: 220px; flex: 1; }
+    .spacer { flex: 1; }
+    .tablewrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 10px 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: var(--surface-2); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .ellipsis { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+    .status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .status.done { background: var(--ok-soft); color: var(--ok); }
+    .status.error { background: var(--danger-soft); color: var(--danger); }
+    .status.pending { background: var(--warn-soft); color: var(--warn); }
+    .pager { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; color: var(--muted); }
+
+    /* Drawer */
+    .scrim { position: fixed; inset: 0; background: rgba(8, 12, 22, .45); z-index: 20; display: none; }
+    .scrim.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: min(780px, 100%); z-index: 21;
+      background: var(--surface); border-left: 1px solid var(--border); box-shadow: -8px 0 30px rgba(0,0,0,.2);
+      transform: translateX(100%); transition: transform .22s; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: none; }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); gap: 12px; }
+    .drawer-head h3 { margin: 0; font-size: 16px; }
+    .drawer-body { overflow: auto; padding: 20px; display: grid; gap: 18px; }
+    .drawer-body img { max-width: 100%; max-height: 340px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; }
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .field small { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    .field div { font-weight: 600; word-break: break-word; }
+    pre.json { background: #0b1220; color: #d7e3fa; padding: 14px; border-radius: 8px; overflow: auto; max-height: 320px; font-size: 12px; direction: ltr; text-align: left; margin: 0; }
+    .alert { background: var(--danger-soft); color: var(--danger); padding: 12px 14px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .modal-head h3 { margin: 0; }
+    .modal .sec { margin: 22px 0 4px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .modal .sec .opt { color: var(--muted); font-weight: 400; }
+    .modal .switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; margin: 0; cursor: pointer; font-size: 13px; }
+    .modal .switch input { width: auto; margin: 0; display: inline-block; }
+    .suggest { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--accent-soft); border: 1px dashed var(--accent); border-radius: 10px; padding: 14px 16px; margin: 4px 0 6px; }
+    .suggest .hint { margin: 2px 0 0; }
+    .suggest-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .frows { display: grid; gap: 8px; margin-bottom: 10px; }
+    .frow { display: grid; grid-template-columns: minmax(150px, 1.2fr) 170px minmax(180px, 1.8fr) 64px auto; gap: 8px; align-items: center; }
+    .modal .frow input, .modal .frow select { margin-top: 0; padding: 8px 10px; }
+    .modal .frow select { display: block; width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font: inherit; font-weight: 400; }
+    .frow.zoned { grid-template-columns: minmax(130px, 1.1fr) 140px 260px minmax(150px, 1.4fr) 64px auto; }
+    .modal .frow .f-req { width: 18px; height: 18px; margin: 0 auto; padding: 0; display: block; }
+    .fhead span:nth-last-child(2) { text-align: center; }
+    .fhead { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+    .fbtns { display: flex; gap: 2px; }
+    .legacy-note { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: 13px; }
+    @media (max-width: 720px) { .frow, .frow.zoned { grid-template-columns: 1fr 1fr; } .frow .f-hint { grid-column: 1 / -1; } .fhead { display: none; } }
+    .kpi.warn div { color: var(--warn); }
+    .status.flagged { background: var(--warn-soft); color: var(--warn); }
+    .status.approved, .status.manual { background: var(--accent-soft); color: var(--accent); }
+    .review-banner { padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--warn-soft); color: var(--text); display: grid; gap: 6px; }
+    .review-banner .btn { margin-left: 10px; padding: 4px 10px; }
+    .review-note { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; }
+    .review-note.warn { background: var(--warn-soft); border-color: var(--warn); }
+    .review-note small { color: var(--muted); }
+    .ed { width: 100%; margin-top: 4px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font: inherit; font-weight: 600; }
+    td .ed { margin-top: 0; min-width: 80px; font-weight: 400; }
+    .ed.missing { border-color: var(--danger); background: var(--danger-soft); }
+    .ed.manual { border-color: var(--warn); background: var(--warn-soft); }
+    .review-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; align-items: center; }
+    .kv { display: inline-block; margin-right: 14px; }
+    .kv small { color: var(--muted); }
+    .hidden { display: none !important; }
+    .toast { position: fixed; top: 16px; right: 16px; z-index: 40; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 8px; box-shadow: var(--shadow); max-width: 360px; display: none; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">OC</div>
+      <div><b>Invoice OCR</b><small>Console</small></div>
+    </div>
+    <div class="nav-label">Không gian làm việc</div>
+    <button class="nav-item active" data-view="scan">Quét hóa đơn</button>
+    <button class="nav-item" data-view="results">Kết quả <span class="badge hidden" id="nav-badge">0</span></button>
+    <div class="sidebar-foot">
+      Công cụ trích xuất<br><b>Gemini 3.8 Flash</b>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="page-title">Quét hóa đơn</h1>
+        <p id="page-sub">Chọn mô hình, tải ảnh vào từng mô hình và bắt đầu quét.</p>
+      </div>
+      <span class="chip" id="job-chip"><span class="dot"></span><span id="job-chip-text">Sẵn sàng</span></span>
+    </header>
+
+    <main class="content">
+      <!-- SCAN VIEW -->
+      <section id="view-scan">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2><span class="step">1</span>Chọn mô hình</h2>
+              <p>Mỗi mô hình là một cách đọc hóa đơn riêng (có prompt riêng). Tạo mô hình của bạn và chọn tối đa <b>5</b> mô hình cho mỗi lần quét.</p>
+            </div>
+            <div>Đã chọn <span class="counter" id="model-counter">0/5</span>
+              <button class="btn" id="btn-new-model" style="margin-left:12px">+ Tạo mô hình</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="models" id="models"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2><span class="step">2</span>Tải ảnh vào từng mô hình</h2>
+              <p>Kéo thả hoặc bấm để chọn nhiều ảnh (PNG, JPG, WEBP). Mỗi mô hình có danh sách ảnh riêng.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="empty" id="panels-empty">Chưa chọn mô hình nào. Hãy chọn ít nhất một mô hình ở bước 1.</div>
+            <div class="panels" id="panels"></div>
+          </div>
+        </div>
+
+        <div class="card hidden" id="progress-card">
+          <div class="card-head">
+            <div>
+              <h2><span class="step">3</span>Tiến độ quét</h2>
+              <p id="progress-text">Đang chuẩn bị...</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="bar" id="overall-bar"><i></i></div>
+            <div class="modelbars" id="modelbars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESULTS VIEW -->
+      <section id="view-results" class="hidden">
+        <div class="kpis">
+          <div class="kpi"><small>Tổng số ảnh</small><div id="kpi-total">0</div></div>
+          <div class="kpi ok"><small>Thành công</small><div id="kpi-done">0</div></div>
+          <div class="kpi err"><small>Lỗi</small><div id="kpi-errors">0</div></div>
+          <div class="kpi warn"><small>Cần xem</small><div id="kpi-flagged">0</div></div>
+          <div class="kpi"><small>Tỷ lệ thành công</small><div id="kpi-rate">0%</div></div>
+        </div>
+
+        <div class="card">
+          <div class="review-banner hidden" id="review-banner"></div>
+          <div class="toolbar">
+            <input type="search" id="search" placeholder="Tìm theo tên file hoặc nội dung đã đọc...">
+            <select id="filter-model"><option value="">Tất cả mô hình</option></select>
+            <select id="filter-status">
+              <option value="">Mọi trạng thái</option>
+              <option value="done">Thành công</option>
+              <option value="error">Lỗi</option>
+              <option value="pending">Đang xử lý</option>
+              <option value="flagged">Cần xem</option>
+              <option value="approved">Đã duyệt để trống</option>
+              <option value="manual">Nhập tay</option>
+            </select>
+            <span class="spacer"></span>
+            <button class="btn" id="btn-del-model" disabled title="Chọn một mô hình ở ô lọc để xóa kết quả của mô hình đó">Xóa kết quả mô hình</button>
+            <button class="btn" id="btn-del-all" disabled>Xóa tất cả</button>
+            <button class="btn" id="btn-excel-table" disabled title="Mỗi mô hình một sheet dạng bảng, tiện lọc và cộng tổng">Excel dạng bảng</button>
+            <button class="btn primary" id="btn-excel" disabled title="Tất cả hóa đơn trong một sheet, mỗi hóa đơn dựng lại bố cục như bản gốc">Tải Excel giống hóa đơn</button>
+          </div>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>Tên file</th><th>Mô hình</th><th>Thông tin chính</th>
+                  <th class="num">Số dòng hàng</th><th>Trạng thái</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div class="empty hidden" id="rows-empty">Chưa có kết quả. Hãy bắt đầu một lần quét ở mục "Quét hóa đơn".</div>
+          <div class="pager">
+            <span id="pager-info"></span>
+            <span>
+              <button class="btn" id="prev">Trước</button>
+              <button class="btn" id="next">Sau</button>
+            </span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="actionbar" id="actionbar">
+  <div class="sum" id="action-sum">Chưa có ảnh nào.</div>
+  <div>
+    <span class="sum" id="upload-text"></span>
+    <button class="btn ghost" id="btn-clear">Xóa tất cả</button>
+    <button class="btn primary lg" id="btn-start" disabled>Bắt đầu quét</button>
+  </div>
+</div>
+
+<div class="modal-wrap hidden" id="modal-wrap">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="m-title">Tạo mô hình mới</h3>
+      <button type="button" class="btn ghost" id="m-x">✕</button>
+    </div>
+    <p class="hint" style="margin-top:0">Mô hình cho AI biết cần đọc những thông tin nào trên hóa đơn. Bạn chỉ cần đặt tên các trường, AI sẽ tự tìm giá trị tương ứng.</p>
+    <div id="m-legacy" class="legacy-note hidden">Mô hình này được tạo theo cách cũ (viết lời nhắc dài). Danh sách trường bên dưới là mẫu mới, hãy chỉnh lại rồi bấm Lưu để chuyển sang cách mới.</div>
+
+    <label>Tên mô hình
+      <input id="m-name" maxlength="60" placeholder="Ví dụ: Hóa đơn điện lực">
+    </label>
+
+    <div class="suggest">
+      <div>
+        <b>Cách nhanh: để AI gợi ý từ ảnh mẫu</b>
+        <div class="hint">Chọn một ảnh hóa đơn mẫu, AI sẽ đề xuất danh sách trường. Bạn kiểm tra và sửa lại ở bên dưới.</div>
+      </div>
+      <div class="suggest-actions">
+        <span id="m-sample-name" class="hint"></span>
+        <input type="file" id="m-sample" accept="image/png,image/jpeg,image/webp" class="hidden">
+        <button type="button" class="btn" id="m-pick">Chọn ảnh mẫu</button>
+        <button type="button" class="btn primary" id="m-suggest" disabled>Gợi ý trường</button>
+      </div>
+    </div>
+
+    <h4 class="sec">1. Thông tin chung trên hóa đơn <span class="opt" id="m-count-fields"></span></h4>
+    <p class="hint" style="margin-top:0">Những thông tin chỉ xuất hiện một lần: số hóa đơn, ngày, người bán, người mua, tổng tiền... Cột "Vị trí trên mẫu" giúp file Excel xuất ra giống bố cục của hóa đơn gốc. Tick "Bắt buộc" cho những trường mà hóa đơn nào cũng phải có: nếu AI không đọc được, hóa đơn sẽ được đánh dấu <b>Cần xem</b> để bạn kiểm tra.</p>
+    <div class="frows" id="m-fields"></div>
+    <button type="button" class="btn" id="m-add-field">+ Thêm trường</button>
+
+    <h4 class="sec">
+      <span>2. Bảng hàng hóa / dịch vụ</span>
+      <label class="switch"><input type="checkbox" id="m-has-lines" checked> Hóa đơn có bảng hàng hóa</label>
+    </h4>
+    <div id="m-lines-wrap">
+      <p class="hint" style="margin-top:0">Các cột của bảng. Mỗi dòng hàng sẽ thành một dòng trong Excel.</p>
+      <div class="frows" id="m-line-fields"></div>
+      <button type="button" class="btn" id="m-add-line">+ Thêm cột</button>
+    </div>
+
+    <h4 class="sec"><span>3. Tiêu đề và chữ ký trên mẫu <span class="opt">(để Excel xuất ra giống hóa đơn)</span></span></h4>
+    <label>Tiêu đề in trên hóa đơn
+      <input id="m-title-text" maxlength="120" placeholder="Ví dụ: HÓA ĐƠN GIÁ TRỊ GIA TĂNG">
+    </label>
+    <label>Các chức danh ký ở cuối hóa đơn <span class="opt">(mỗi dòng một chức danh, tối đa 4)</span>
+      <textarea id="m-signatures" rows="3" placeholder="NGƯỜI MUA HÀNG&#10;NGƯỜI BÁN HÀNG"></textarea>
+    </label>
+
+    <h4 class="sec"><span>4. Ghi chú thêm cho AI <span class="opt">(không bắt buộc)</span></span></h4>
+    <textarea id="m-notes" rows="3" placeholder="Ví dụ: Ảnh bị nghiêng. Bỏ qua con dấu đỏ. Tên hàng dài có thể xuống dòng thì nối lại."></textarea>
+
+    <div id="m-error" class="alert hidden" style="margin-top:12px"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="m-cancel">Hủy</button>
+      <button type="button" class="btn primary" id="m-save">Lưu mô hình</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <div><h3 id="d-title">Chi tiết hóa đơn</h3><span class="tag" id="d-model"></span></div>
+    <div>
+      <button class="btn" id="d-excel">Tải Excel hóa đơn này</button>
+      <button class="btn" id="d-delete">Xóa</button>
+      <button class="btn ghost" id="d-close">Đóng</button>
+    </div>
+  </div>
+  <div class="drawer-body" id="d-body"></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+  const MAX_MODELS = 5;
+  const PAGE_SIZE = 50;
+  const FILE_LIST_LIMIT = 200;
+
+  const state = {
+    models: [],              // [{id, name, fields, line_fields, notes}] loaded from the server
+    defaultFields: [],
+    defaultLineFields: [],
+    defaultTitle: "",
+    defaultSignatures: [],
+    selected: [],            // model ids, in the order picked
+    files: {},               // model id -> File[]
+    jobId: null,
+    jobFinished: false,
+    rows: [],
+    page: 0,
+    view: "scan",
+    pollTimer: null,
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.style.display = "block";
+    setTimeout(() => (el.style.display = "none"), 3500);
+  }
+  function fmtSize(bytes) {
+    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + " MB";
+    return Math.max(1, Math.round(bytes / 1024)) + " KB";
+  }
+  function fmtMoney(v) {
+    if (v === null || v === undefined || v === "") return "";
+    const n = Number(v);
+    return isNaN(n) ? esc(v) : n.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+  }
+  const TYPE_NAMES = {
+    text: "Chữ", number: "Số", money: "Tiền (VND)", date: "Ngày (dd/mm/yyyy)", percent: "Phần trăm (%)", yesno: "Có / Không",
+  };
+  const ZONE_NAMES = {
+    top_left: "Đầu trang, bên trái (người bán)",
+    top_right: "Đầu trang, bên phải (số, ký hiệu)",
+    subtitle: "Dưới tiêu đề (ngày lập)",
+    info: "Thông tin chung (người mua...)",
+    totals: "Phần tổng tiền (dưới bảng)",
+    footer: "Cuối trang (bằng chữ...)",
+    bottom: "Chân trang (mã tra cứu...)",
+  };
+  function fmtValue(value, type) {
+    if (value === null || value === undefined || value === "") return "";
+    if (type === "yesno") return value === true ? "Có" : value === false ? "Không" : String(value);
+    if (typeof value === "number" && ["number", "money", "percent"].includes(type)) {
+      const text = value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+      return type === "percent" ? text + "%" : text;
+    }
+    return String(value);
+  }
+  function totalFiles() {
+    return state.selected.reduce((sum, m) => sum + (state.files[m] || []).length, 0);
+  }
+
+  /* ---------- Navigation ---------- */
+  const TITLES = {
+    scan: ["Quét hóa đơn", "Chọn mô hình, tải ảnh vào từng mô hình và bắt đầu quét."],
+    results: ["Kết quả", "Xem, lọc và xuất dữ liệu đã trích xuất."],
+  };
+  function showView(name) {
+    state.view = name;
+    $("view-scan").classList.toggle("hidden", name !== "scan");
+    $("view-results").classList.toggle("hidden", name !== "results");
+    $("actionbar").classList.toggle("hidden", name !== "scan");
+    document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
+    $("page-title").textContent = TITLES[name][0];
+    $("page-sub").textContent = TITLES[name][1];
+    if (name === "results") loadResults();
+  }
+  document.querySelectorAll(".nav-item").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
+
+  /* ---------- Step 1: model picker ---------- */
+  function modelName(id) {
+    const m = state.models.find((x) => x.id === id);
+    return m ? m.name : id;
+  }
+  async function loadModels() {
+    try {
+      const response = await fetch("/models");
+      const data = await response.json();
+      state.models = data.models;
+      state.defaultFields = data.default_fields;
+      state.defaultLineFields = data.default_line_fields;
+      state.defaultTitle = data.default_title;
+      state.defaultSignatures = data.default_signatures;
+    } catch (_) {
+      toast("Không tải được danh sách mô hình.");
+    }
+    // Drop selections of models that no longer exist
+    state.selected = state.selected.filter((id) => state.models.some((m) => m.id === id));
+    renderAll();
+  }
+  function renderModels() {
+    const box = $("models");
+    box.innerHTML = "";
+    const full = state.selected.length >= MAX_MODELS;
+    for (const m of state.models) {
+      const picked = state.selected.includes(m.id);
+      const card = document.createElement("div");
+      card.className = "model" + (picked ? " selected" : "") + (full && !picked ? " disabled" : "");
+      const count = picked ? (state.files[m.id] || []).length : 0;
+      card.innerHTML = `<span class="tick">✓</span><div class="name">${esc(m.name)}</div>
+        <div class="meta">${(m.fields || []).length} trường${(m.line_fields || []).length ? " · bảng " + m.line_fields.length + " cột" : ""}${picked ? " · " + count + " ảnh" : ""}</div>
+        <div class="model-actions">
+          <button class="icon-btn" data-act="edit">Sửa</button>
+          <button class="icon-btn danger" data-act="delete">Xóa</button>
+        </div>`;
+      card.addEventListener("click", (e) => {
+        const act = e.target.closest("[data-act]");
+        if (act && act.dataset.act === "edit") return openModelModal(m);
+        if (act && act.dataset.act === "delete") return deleteModel(m);
+        if (!card.classList.contains("disabled")) toggleModel(m.id);
+      });
+      box.appendChild(card);
+    }
+    const add = document.createElement("div");
+    add.className = "model new";
+    add.textContent = state.models.length ? "+ Tạo mô hình mới" : "+ Tạo mô hình đầu tiên";
+    add.addEventListener("click", () => openModelModal(null));
+    box.appendChild(add);
+    $("model-counter").textContent = `${state.selected.length}/${MAX_MODELS}`;
+  }
+
+  /* ---------- Create / edit / delete model ---------- */
+  let editingModelId = null;
+  let modalFields = [];
+  let modalLines = [];
+  let sampleFile = null;
+  const clone = (list) => list.map((f) => ({ ...f }));
+
+  function typeOptions(selected) {
+    return Object.entries(TYPE_NAMES).map(([t, label]) => `<option value="${t}" ${t === selected ? "selected" : ""}>${esc(label)}</option>`).join("");
+  }
+  function zoneOptions(selected) {
+    return Object.entries(ZONE_NAMES).map(([z, label]) => `<option value="${z}" ${z === (selected || "info") ? "selected" : ""}>${esc(label)}</option>`).join("");
+  }
+  function renderFieldRows(boxId, list, namePlaceholder, withZone) {
+    const box = $(boxId);
+    box.innerHTML = "";
+    if (!list.length) {
+      box.innerHTML = '<div class="hint">Chưa có mục nào. Bấm nút thêm bên dưới.</div>';
+      return;
+    }
+    const head = document.createElement("div");
+    head.className = "frow fhead" + (withZone ? " zoned" : "");
+    head.innerHTML = "<span>Tên (như người dùng gọi)</span><span>Kiểu dữ liệu</span>"
+      + (withZone ? "<span>Vị trí trên mẫu</span>" : "")
+      + "<span>Tìm ở đâu trên hóa đơn</span><span>Bắt buộc</span><span></span>";
+    box.appendChild(head);
+    list.forEach((f, i) => {
+      const row = document.createElement("div");
+      row.className = "frow" + (withZone ? " zoned" : "");
+      row.innerHTML = `<input class="f-label" maxlength="60" placeholder="${namePlaceholder}" value="${esc(f.label)}">
+        <select class="f-type">${typeOptions(f.type)}</select>
+        ${withZone ? `<select class="f-zone">${zoneOptions(f.zone)}</select>` : ""}
+        <input class="f-hint" maxlength="200" placeholder="Ví dụ: góc phải phía trên" value="${esc(f.hint)}">
+        <input type="checkbox" class="f-req" title="Nếu AI không đọc được trường này, hóa đơn sẽ được đánh dấu Cần xem" ${f.required ? "checked" : ""}>
+        <div class="fbtns">
+          <button type="button" class="icon-btn" data-m="up" title="Chuyển lên">▲</button>
+          <button type="button" class="icon-btn" data-m="down" title="Chuyển xuống">▼</button>
+          <button type="button" class="icon-btn danger" data-m="del" title="Xóa">✕</button>
+        </div>`;
+      row.querySelector(".f-label").addEventListener("input", (e) => (f.label = e.target.value));
+      row.querySelector(".f-type").addEventListener("change", (e) => (f.type = e.target.value));
+      if (withZone) row.querySelector(".f-zone").addEventListener("change", (e) => (f.zone = e.target.value));
+      row.querySelector(".f-hint").addEventListener("input", (e) => (f.hint = e.target.value));
+      row.querySelector(".f-req").addEventListener("change", (e) => (f.required = e.target.checked));
+      row.querySelector(".fbtns").addEventListener("click", (e) => {
+        const act = e.target.closest("[data-m]");
+        if (!act) return;
+        if (act.dataset.m === "del") list.splice(i, 1);
+        if (act.dataset.m === "up" && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
+        if (act.dataset.m === "down" && i < list.length - 1) [list[i + 1], list[i]] = [list[i], list[i + 1]];
+        renderModal();
+      });
+      box.appendChild(row);
+    });
+  }
+  function renderModal() {
+    renderFieldRows("m-fields", modalFields, "Ví dụ: Số hóa đơn", true);
+    renderFieldRows("m-line-fields", modalLines, "Ví dụ: Tên hàng", false);
+    $("m-lines-wrap").classList.toggle("hidden", !$("m-has-lines").checked);
+    $("m-count-fields").textContent = modalFields.length ? `(${modalFields.length} trường)` : "";
+  }
+  function openModelModal(model) {
+    editingModelId = model ? model.id : null;
+    $("m-title").textContent = model ? "Sửa mô hình" : "Tạo mô hình mới";
+    $("m-name").value = model ? model.name : "";
+    const legacy = model && !(model.fields || []).length && !(model.line_fields || []).length;
+    $("m-legacy").classList.toggle("hidden", !legacy);
+    if (model && !legacy) {
+      modalFields = clone(model.fields || []);
+      modalLines = clone(model.line_fields || []);
+      $("m-has-lines").checked = modalLines.length > 0;
+      $("m-notes").value = model.notes || "";
+      $("m-title-text").value = model.title || "";
+      $("m-signatures").value = (model.signatures || []).join("\n");
+    } else {
+      modalFields = clone(state.defaultFields);
+      modalLines = clone(state.defaultLineFields);
+      $("m-has-lines").checked = true;
+      $("m-notes").value = "";
+      $("m-title-text").value = state.defaultTitle;
+      $("m-signatures").value = state.defaultSignatures.join("\n");
+    }
+    sampleFile = null;
+    $("m-sample-name").textContent = "";
+    $("m-suggest").disabled = true;
+    $("m-error").classList.add("hidden");
+    renderModal();
+    $("modal-wrap").classList.remove("hidden");
+    $("m-name").focus();
+  }
+  function closeModelModal() { $("modal-wrap").classList.add("hidden"); }
+  function showModalError(message) {
+    $("m-error").textContent = message;
+    $("m-error").classList.remove("hidden");
+  }
+  $("btn-new-model").addEventListener("click", () => openModelModal(null));
+  $("m-cancel").addEventListener("click", closeModelModal);
+  $("m-x").addEventListener("click", closeModelModal);
+  $("modal-wrap").addEventListener("click", (e) => { if (e.target === $("modal-wrap")) closeModelModal(); });
+  $("m-add-field").addEventListener("click", () => {
+    modalFields.push({ label: "", type: "text", hint: "", zone: "info", required: false });
+    renderModal();
+    const inputs = document.querySelectorAll("#m-fields .f-label");
+    inputs[inputs.length - 1].focus();
+  });
+  $("m-add-line").addEventListener("click", () => {
+    modalLines.push({ label: "", type: "text", hint: "", required: false });
+    renderModal();
+    const inputs = document.querySelectorAll("#m-line-fields .f-label");
+    inputs[inputs.length - 1].focus();
+  });
+  $("m-has-lines").addEventListener("change", () => {
+    if ($("m-has-lines").checked && !modalLines.length) modalLines = clone(state.defaultLineFields);
+    renderModal();
+  });
+  $("m-pick").addEventListener("click", () => $("m-sample").click());
+  $("m-sample").addEventListener("change", () => {
+    sampleFile = $("m-sample").files[0] || null;
+    $("m-sample-name").textContent = sampleFile ? sampleFile.name : "";
+    $("m-suggest").disabled = !sampleFile;
+  });
+  $("m-suggest").addEventListener("click", async () => {
+    if (!sampleFile) return;
+    const form = new FormData();
+    form.append("image", sampleFile);
+    $("m-suggest").disabled = true;
+    $("m-suggest").textContent = "AI đang đọc ảnh...";
+    $("m-error").classList.add("hidden");
+    try {
+      const response = await fetch("/models/suggest", { method: "POST", body: form });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      modalFields = data.fields;
+      modalLines = data.line_fields;
+      $("m-has-lines").checked = modalLines.length > 0;
+      if (data.notes) $("m-notes").value = data.notes;
+      if (data.title) $("m-title-text").value = data.title;
+      $("m-signatures").value = (data.signatures || []).join("\n");
+      renderModal();
+      toast(`AI gợi ý ${modalFields.length} trường và ${modalLines.length} cột bảng. Hãy kiểm tra lại trước khi lưu.`);
+    } catch (err) {
+      showModalError(err.message);
+    } finally {
+      $("m-suggest").disabled = false;
+      $("m-suggest").textContent = "Gợi ý trường";
+    }
+  });
+  $("m-save").addEventListener("click", async () => {
+    const payload = {
+      name: $("m-name").value,
+      fields: modalFields,
+      line_fields: $("m-has-lines").checked ? modalLines : [],
+      notes: $("m-notes").value,
+      title: $("m-title-text").value,
+      signatures: $("m-signatures").value.split("\n"),
+    };
+    $("m-save").disabled = true;
+    try {
+      const response = await fetch(editingModelId ? `/models/${editingModelId}` : "/models", {
+        method: editingModelId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      closeModelModal();
+      await loadModels();
+      toast(editingModelId ? "Đã lưu mô hình." : "Đã tạo mô hình.");
+    } catch (err) {
+      showModalError(err.message);
+    } finally {
+      $("m-save").disabled = false;
+    }
+  });
+  async function deleteModel(model) {
+    if (!confirm(`Xóa mô hình "${model.name}"? Các ảnh đã tải vào mô hình này sẽ bị bỏ khỏi danh sách chờ.`)) return;
+    try {
+      const response = await fetch(`/models/${model.id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      delete state.files[model.id];
+      await loadModels();
+    } catch (err) {
+      toast("Không xóa được mô hình: " + err.message);
+    }
+  }
+  function toggleModel(name) {
+    const index = state.selected.indexOf(name);
+    if (index >= 0) {
+      state.selected.splice(index, 1);
+      delete state.files[name];
+    } else if (state.selected.length < MAX_MODELS) {
+      state.selected.push(name);
+      state.files[name] = [];
+    }
+    renderAll();
+  }
+
+  /* ---------- Step 2: upload panels ---------- */
+  function renderPanels() {
+    const box = $("panels");
+    box.innerHTML = "";
+    $("panels-empty").classList.toggle("hidden", state.selected.length > 0);
+    for (const name of state.selected) {
+      const files = state.files[name];
+      const panel = document.createElement("div");
+      panel.className = "panel";
+      panel.innerHTML = `
+        <div class="panel-head">
+          <div><b>${esc(modelName(name))}</b> <span class="panel-count">· ${files.length} ảnh</span></div>
+          <button class="btn ghost" data-act="clear">Xóa ảnh</button>
+        </div>
+        <div class="drop" data-act="pick">
+          <strong>Bấm để chọn ảnh</strong> hoặc kéo thả vào đây
+          <small>Có thể chọn nhiều ảnh cùng lúc</small>
+        </div>
+        <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" multiple>
+        <div class="filelist ${files.length ? "" : "hidden"}"></div>`;
+
+      const input = panel.querySelector("input");
+      const drop = panel.querySelector(".drop");
+      const list = panel.querySelector(".filelist");
+
+      drop.addEventListener("click", () => input.click());
+      input.addEventListener("change", () => { addFiles(name, input.files); input.value = ""; });
+      drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+      drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+      drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); addFiles(name, e.dataTransfer.files); });
+      panel.querySelector('[data-act="clear"]').addEventListener("click", () => { state.files[name] = []; renderAll(); });
+
+      files.slice(0, FILE_LIST_LIMIT).forEach((file, i) => {
+        const row = document.createElement("div");
+        row.className = "file";
+        row.innerHTML = `<span class="n">${esc(file.name)} <small style="color:var(--muted)">${fmtSize(file.size)}</small></span><button title="Bỏ ảnh này">×</button>`;
+        row.querySelector("button").addEventListener("click", () => { state.files[name].splice(i, 1); renderAll(); });
+        list.appendChild(row);
+      });
+      if (files.length > FILE_LIST_LIMIT) {
+        const more = document.createElement("div");
+        more.className = "file";
+        more.textContent = `... và ${files.length - FILE_LIST_LIMIT} ảnh khác`;
+        list.appendChild(more);
+      }
+      box.appendChild(panel);
+    }
+  }
+  function addFiles(model, fileList) {
+    const allowed = Array.from(fileList).filter((f) => /^image\/(png|jpeg|webp)$/.test(f.type));
+    const skipped = fileList.length - allowed.length;
+    state.files[model].push(...allowed);
+    if (skipped) toast(`Bỏ qua ${skipped} file không phải ảnh PNG/JPG/WEBP.`);
+    renderAll();
+  }
+
+  /* ---------- Action bar ---------- */
+  function renderActionBar() {
+    const n = totalFiles();
+    $("action-sum").innerHTML = n
+      ? `<b>${n}</b> ảnh trong <b>${state.selected.filter((m) => state.files[m].length).length}</b> mô hình`
+      : "Chưa có ảnh nào.";
+    const running = state.jobId && !state.jobFinished;
+    $("btn-start").disabled = n === 0 || running;
+    $("btn-clear").classList.toggle("hidden", n === 0);
+  }
+  $("btn-clear").addEventListener("click", () => {
+    state.selected.forEach((m) => (state.files[m] = []));
+    renderAll();
+  });
+
+  function renderAll() {
+    renderModels();
+    renderPanels();
+    renderActionBar();
+  }
+
+  /* ---------- Start job ---------- */
+  $("btn-start").addEventListener("click", () => {
+    const form = new FormData();
+    let count = 0;
+    for (const name of state.selected) {
+      for (const file of state.files[name]) {
+        form.append("files", file);
+        form.append("types", name);
+        count++;
+      }
+    }
+    if (!count) return;
+
+    $("btn-start").disabled = true;
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/batch/start");
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) $("upload-text").textContent = `Đang tải lên ${Math.round((e.loaded / e.total) * 100)}%`;
+    };
+    xhr.onload = () => {
+      $("upload-text").textContent = "";
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch (_) {}
+      if (xhr.status !== 200) {
+        toast(data.error || `Lỗi HTTP ${xhr.status}`);
+        renderActionBar();
+        return;
+      }
+      state.jobId = data.job_id;
+      state.jobFinished = false;
+      try { localStorage.setItem("ocr-job-id", data.job_id); } catch (_) {}
+      // The files are on the server now, clear the local queue
+      state.selected.forEach((m) => (state.files[m] = []));
+      renderAll();
+      $("progress-card").classList.remove("hidden");
+      startPolling();
+    };
+    xhr.onerror = () => { $("upload-text").textContent = ""; toast("Không kết nối được tới server."); renderActionBar(); };
+    xhr.send(form);
+  });
+
+  /* ---------- Progress polling ---------- */
+  function startPolling() {
+    clearTimeout(state.pollTimer);
+    pollStatus();
+  }
+  async function pollStatus() {
+    if (!state.jobId) return;
+    let s;
+    try {
+      const response = await fetch(`/batch/${state.jobId}/status`);
+      if (response.status === 404) { state.jobId = null; setChip("idle"); return; }
+      s = await response.json();
+    } catch (_) {
+      state.pollTimer = setTimeout(pollStatus, 4000);
+      return;
+    }
+    state.jobFinished = s.finished;
+    renderProgress(s);
+    updateKpis(s);
+    renderActionBar();
+    setChip(s.finished ? "done" : "running", s);
+    if (state.view === "results") loadResults();
+    if (!s.finished) state.pollTimer = setTimeout(pollStatus, 2000);
+  }
+  function setChip(kind, s) {
+    const chip = $("job-chip");
+    chip.className = "chip " + (kind === "idle" ? "" : kind);
+    const text = { idle: "Sẵn sàng", running: "Đang quét", done: "Hoàn tất" }[kind];
+    $("job-chip-text").textContent = s && kind !== "idle" ? `${text} · ${s.done + s.errors}/${s.total}` : text;
+  }
+  function renderProgress(s) {
+    $("progress-card").classList.remove("hidden");
+    const processed = s.done + s.errors;
+    $("overall-bar").firstElementChild.style.width = s.total ? `${(processed / s.total) * 100}%` : "0%";
+    $("overall-bar").classList.toggle("ok", s.finished);
+    $("progress-text").textContent = s.finished
+      ? `Đã xử lý xong ${s.total} ảnh: ${s.done} thành công, ${s.errors} lỗi.`
+      : `Đang xử lý ${processed}/${s.total} ảnh...`;
+    const box = $("modelbars");
+    box.innerHTML = "";
+    for (const [name, t] of Object.entries(s.by_type || {})) {
+      const p = t.done + t.errors;
+      const row = document.createElement("div");
+      row.className = "mbar-row";
+      row.innerHTML = `<b>${esc(name)}</b>
+        <div class="bar ${p === t.total ? "ok" : ""}"><i style="width:${t.total ? (p / t.total) * 100 : 0}%"></i></div>
+        <span>${p}/${t.total}${t.errors ? ` · ${t.errors} lỗi` : ""}</span>`;
+      box.appendChild(row);
+    }
+  }
+  function updateKpis(s) {
+    $("kpi-total").textContent = s.total;
+    $("kpi-done").textContent = s.done;
+    $("kpi-errors").textContent = s.errors;
+    const processed = s.done + s.errors;
+    $("kpi-rate").textContent = processed ? Math.round((s.done / processed) * 100) + "%" : "0%";
+    const rv = s.review || {};
+    $("kpi-flagged").textContent = rv.flagged || 0;
+    const notes = [];
+    if (rv.flagged) notes.push(`<div><b>${rv.flagged} hóa đơn cần xem</b> (${rv.flagged_blur} do ảnh có vẻ mờ, ${rv.flagged_other} do lý do khác như bị che chữ hoặc chọn nhầm mô hình).<button class="btn" id="btn-show-flagged">Chỉ hiện hóa đơn cần xem</button></div>`);
+    if (rv.approved) notes.push(`<div>${rv.approved} hóa đơn đã duyệt với một số trường để trống.</div>`);
+    if (rv.manual) notes.push(`<div>${rv.manual} hóa đơn có giá trị nhập tay (tô vàng trong file Excel).</div>`);
+    $("review-banner").innerHTML = notes.join("");
+    $("review-banner").classList.toggle("hidden", !notes.length);
+    $("nav-badge").textContent = s.total;
+    $("nav-badge").classList.toggle("hidden", !s.total);
+    $("btn-excel").disabled = !s.finished || s.total === 0;
+    $("btn-excel-table").disabled = !s.finished || s.total === 0;
+    $("btn-del-all").disabled = !state.jobId;
+    $("btn-excel").title = s.finished ? "" : "Chờ quét xong để tải Excel";
+  }
+
+  /* ---------- Results ---------- */
+  async function loadResults() {
+    if (!state.jobId) { state.rows = []; renderRows(); return; }
+    try {
+      const response = await fetch(`/batch/${state.jobId}/results`);
+      if (!response.ok) return;
+      state.rows = await response.json();
+    } catch (_) { return; }
+    const models = [...new Set(state.rows.map((r) => r.invoice_type))];
+    const select = $("filter-model");
+    const current = select.value;
+    select.innerHTML = '<option value="">Tất cả mô hình</option>' + models.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join("");
+    select.value = current;
+    renderRows();
+  }
+  function filteredRows() {
+    const q = $("search").value.trim().toLowerCase();
+    const model = $("filter-model").value;
+    const status = $("filter-status").value;
+    return state.rows.filter((r) => {
+      if (model && r.invoice_type !== model) return false;
+      if (status === "flagged" || status === "approved") {
+        if (r.status !== "done" || r.review_state !== status) return false;
+      } else if (status === "manual") {
+        if (r.status_label !== "Nhập tay") return false;
+      } else if (status && r.status !== status) return false;
+      if (!q) return true;
+      return [r.filename, ...(r.summary || []).map((s) => s.value)].some((v) => String(v ?? "").toLowerCase().includes(q));
+    });
+  }
+  const STATUS_LABEL = { done: "Thành công", error: "Lỗi", pending: "Đang xử lý" };
+  const BADGE = { "Tự động": "done", "Nhập tay": "manual", "Cần xem": "flagged", "Duyệt để trống": "approved", "Lỗi": "error", "Đang xử lý": "pending" };
+  function renderRows() {
+    const rows = filteredRows();
+    const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    state.page = Math.min(state.page, pages - 1);
+    const slice = rows.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+    $("rows").innerHTML = slice.map((r) => `
+      <tr data-index="${r.index}">
+        <td>${r.index + 1}</td>
+        <td><div class="ellipsis" title="${esc(r.filename)}">${esc(r.filename)}</div></td>
+        <td><span class="tag">${esc(r.invoice_type)}</span></td>
+        <td><div style="max-width:560px">${(r.summary || []).map((s) => `<span class="kv"><small>${esc(s.label)}:</small> ${esc(fmtValue(s.value, s.type))}</span>`).join("")}${r.status === "error" ? `<span style="color:var(--danger)">${esc(r.error)}</span>` : ""}</div></td>
+        <td class="num">${r.status === "done" ? r.line_count : ""}</td>
+        <td><span class="status ${BADGE[r.status_label] || r.status}">${esc(r.status_label || STATUS_LABEL[r.status])}</span></td>
+        <td><button class="btn ghost row-del" data-del="${r.index}" title="Xóa kết quả này">Xóa</button></td>
+      </tr>`).join("");
+    $("btn-del-model").disabled = !$("filter-model").value;
+    $("rows-empty").classList.toggle("hidden", state.rows.length > 0);
+    $("pager-info").textContent = rows.length
+      ? `${state.page * PAGE_SIZE + 1}–${Math.min((state.page + 1) * PAGE_SIZE, rows.length)} / ${rows.length}`
+      : "0 kết quả";
+    $("prev").disabled = state.page === 0;
+    $("next").disabled = state.page >= pages - 1;
+  }
+  $("review-banner").addEventListener("click", (e) => {
+    if (!e.target.closest("#btn-show-flagged")) return;
+    $("filter-status").value = "flagged";
+    state.page = 0;
+    renderRows();
+  });
+  $("search").addEventListener("input", () => { state.page = 0; renderRows(); });
+  $("filter-model").addEventListener("change", () => { state.page = 0; renderRows(); });
+  $("filter-status").addEventListener("change", () => { state.page = 0; renderRows(); });
+  $("prev").addEventListener("click", () => { state.page--; renderRows(); });
+  $("next").addEventListener("click", () => { state.page++; renderRows(); });
+  $("rows").addEventListener("click", (e) => {
+    const del = e.target.closest(".row-del");
+    if (del) return deleteItem(Number(del.dataset.del));
+    const tr = e.target.closest("tr");
+    if (tr) openDrawer(Number(tr.dataset.index));
+  });
+
+  /* ---------- Delete results ---------- */
+  async function refreshAfterDelete() {
+    await pollStatus();
+    await loadResults();
+  }
+  async function deleteItem(index) {
+    if (!confirm("Xóa kết quả của hóa đơn này?")) return;
+    const response = await fetch(`/batch/${state.jobId}/item/${index}`, { method: "DELETE" });
+    if (!response.ok) { toast("Không xóa được kết quả."); return; }
+    closeDrawer();
+    refreshAfterDelete();
+  }
+  $("btn-del-model").addEventListener("click", async () => {
+    const name = $("filter-model").value;
+    if (!name || !confirm(`Xóa toàn bộ kết quả của mô hình "${name}"?`)) return;
+    const response = await fetch(`/batch/${state.jobId}?model=${encodeURIComponent(name)}`, { method: "DELETE" });
+    if (!response.ok) { toast("Không xóa được kết quả."); return; }
+    $("filter-model").value = "";
+    refreshAfterDelete();
+  });
+  $("btn-del-all").addEventListener("click", async () => {
+    if (!state.jobId || !confirm("Xóa TẤT CẢ kết quả và ảnh đã tải của lần quét này? Không thể khôi phục.")) return;
+    const response = await fetch(`/batch/${state.jobId}`, { method: "DELETE" });
+    if (!response.ok) { toast("Không xóa được kết quả."); return; }
+    resetJob();
+    toast("Đã xóa tất cả kết quả.");
+  });
+  function resetJob() {
+    clearTimeout(state.pollTimer);
+    state.jobId = null;
+    state.jobFinished = false;
+    state.rows = [];
+    try { localStorage.removeItem("ocr-job-id"); } catch (_) {}
+    updateKpis({ total: 0, done: 0, errors: 0, finished: false });
+    $("progress-card").classList.add("hidden");
+    setChip("idle");
+    $("filter-model").innerHTML = '<option value="">Tất cả mô hình</option>';
+    renderRows();
+    renderActionBar();
+  }
+  $("btn-excel").addEventListener("click", () => {
+    if (state.jobId) window.location.href = `/batch/${state.jobId}/excel`;
+  });
+  $("btn-excel-table").addEventListener("click", () => {
+    if (state.jobId) window.location.href = `/batch/${state.jobId}/excel?format=table`;
+  });
+
+  /* ---------- Detail drawer ---------- */
+  let drawerResult = null;
+  let drawerIndex = null;
+  function closeDrawer() {
+    $("drawer").classList.remove("open");
+    $("scrim").classList.remove("open");
+  }
+  $("d-close").addEventListener("click", closeDrawer);
+  $("scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+
+  const NUMERIC = ["number", "money", "percent"];
+  const QUALITY_NAMES = { clear: "rõ", blurry: "mờ", unreadable: "không đọc được" };
+  let drawerSchema = { fields: [], line_fields: [] };
+
+  function editValue(value, type) {
+    if (value === null || value === undefined) return "";
+    if (type === "yesno") return value === true ? "Có" : value === false ? "Không" : String(value);
+    if (typeof value === "number") return String(value).replace(".", ",");  // the server reads "," as the decimal mark
+    return String(value);
+  }
+  function editInput(attrs, value, type, cls) {
+    if (type === "yesno") {
+      const current = editValue(value, type);
+      return `<select ${attrs} class="${cls}"><option value=""></option><option ${current === "Có" ? "selected" : ""}>Có</option><option ${current === "Không" ? "selected" : ""}>Không</option></select>`;
+    }
+    const extra = NUMERIC.includes(type) ? 'inputmode="decimal"' : type === "date" ? 'placeholder="DD/MM/YYYY"' : "";
+    return `<input ${attrs} class="${cls}" ${extra} value="${esc(editValue(value, type))}">`;
+  }
+  function lineRowHtml(cols, row, rowIndex, missing, manual) {
+    const cells = cols.map((c) => {
+      const key = `line_items.${rowIndex}.${c.key}`;
+      const cls = "ed" + (missing.has(key) ? " missing" : "") + (manual.has(key) ? " manual" : "");
+      return `<td class="${NUMERIC.includes(c.type) ? "num" : ""}">${editInput(`data-col="${c.key}"`, row[c.key], c.type, cls)}</td>`;
+    }).join("");
+    return `<tr style="cursor:default">${cells}<td><button type="button" class="icon-btn danger" data-del-row title="Xóa dòng">✕</button></td></tr>`;
+  }
+  function reviewNote(review, item) {
+    const labels = (review.missing || []).map((m) => m.label);
+    const shown = labels.slice(0, 8).join(", ") + (labels.length > 8 ? `, ... (còn ${labels.length - 8})` : "");
+    const lines = [];
+    if (review.state === "flagged") {
+      lines.push(`<div><b>Cần xem:</b> ${labels.length} mục bắt buộc chưa có giá trị: ${esc(shown)}.</div>`);
+      lines.push(`<div>${review.reason === "blur" ? "Ảnh có vẻ mờ." : "Ảnh không mờ rõ rệt, có thể bị che chữ hoặc chọn nhầm mô hình."} Điền các ô đỏ bên dưới rồi bấm Lưu, hoặc bấm Duyệt để bỏ trống.</div>`);
+    } else if (review.state === "approved") {
+      lines.push(`<div><b>Đã duyệt</b> với ${labels.length} mục bắt buộc để trống: ${esc(shown)}.</div>`);
+    } else if (item.status_label === "Nhập tay") {
+      lines.push("<div><b>Đã nhập tay</b> một số giá trị (ô tô vàng).</div>");
+    }
+    if (review.wrong_model) lines.push("<div>Hơn một nửa số trường bị trống, hãy kiểm tra lại đã chọn đúng mô hình chưa.</div>");
+    if (review.model_quality != null || review.blur_score != null) {
+      lines.push(`<small>Chất lượng ảnh theo AI: ${esc(QUALITY_NAMES[review.model_quality] || "không rõ")} · Độ nét đo được: ${review.blur_score ?? "—"}</small>`);
+    }
+    if (!lines.length) return "";
+    return `<div class="review-note ${review.state === "flagged" ? "warn" : ""}">${lines.join("")}</div>`;
+  }
+
+  async function openDrawer(index) {
+    drawerIndex = index;
+    $("d-body").innerHTML = '<div class="empty">Đang tải...</div>';
+    $("d-excel").disabled = true;
+    $("drawer").classList.add("open");
+    $("scrim").classList.add("open");
+    try {
+      const response = await fetch(`/batch/${state.jobId}/item/${index}`);
+      renderDrawer(await response.json(), index);
+    } catch (_) {
+      $("d-body").innerHTML = '<div class="alert">Không tải được chi tiết hóa đơn.</div>';
+    }
+  }
+  function renderDrawer(item, index) {
+    $("d-title").textContent = item.filename;
+    $("d-model").textContent = item.invoice_type;
+    drawerResult = item.result;
+    $("d-excel").disabled = !item.result;
+
+    const r = item.result || {};
+    const schema = item.schema || { fields: [], line_fields: [] };
+    drawerSchema = schema;
+    const review = item.review || { state: "ok", missing: [] };
+    const missing = new Set((review.missing || []).map((m) => m.key));
+    const manual = new Set(item.manual || []);
+    const body = [];
+    if (item.error) body.push(`<div class="alert">${esc(item.error)}</div>`);
+    if (item.result) body.push(reviewNote(review, item));
+    body.push(`<a href="/batch/${state.jobId}/image/${index}" target="_blank" title="Mở ảnh gốc ở tab mới"><img src="/batch/${state.jobId}/image/${index}" alt="Ảnh hóa đơn gốc" onerror="this.style.display='none'"></a>`);
+    if (item.result) {
+      if (schema.fields.length) {
+        body.push(`<div class="fields">${schema.fields.map((f) => {
+          const cls = "ed" + (missing.has(f.key) ? " missing" : "") + (manual.has(f.key) ? " manual" : "");
+          return `<div class="field"><small>${esc(f.label)}${f.required ? " *" : ""}</small>${editInput(`data-key="${f.key}"`, r[f.key], f.type, cls)}</div>`;
+        }).join("")}</div>`);
+      }
+      if (schema.line_fields.length) {
+        const cols = schema.line_fields;
+        const lines = r.line_items || [];
+        body.push(`<div>${missing.has("line_items") ? '<div class="alert" style="margin-bottom:8px">Chưa đọc được bảng hàng hóa. Bấm "Thêm dòng" để nhập.</div>' : ""}<div class="tablewrap"><table class="lines">
+          <thead><tr>${cols.map((c) => `<th class="${NUMERIC.includes(c.type) ? "num" : ""}">${esc(c.label)}${c.required ? " *" : ""}</th>`).join("")}<th></th></tr></thead>
+          <tbody>${lines.map((l, n) => lineRowHtml(cols, l, n, missing, manual)).join("")}</tbody>
+        </table></div><button type="button" class="btn" id="d-add-row" style="margin-top:8px">+ Thêm dòng</button></div>`);
+      }
+      const approveLabel = review.missing && review.missing.length ? `Duyệt (để trống ${review.missing.length} mục)` : "Duyệt";
+      body.push(`<div class="review-actions">
+        <button type="button" class="btn" id="d-save">Lưu thay đổi</button>
+        ${review.state === "ok" ? "" : `<button type="button" class="btn primary" id="d-approve">${esc(approveLabel)}</button>`}
+      </div>`);
+      body.push(`<details><summary style="cursor:pointer;color:var(--muted)">Xem JSON gốc</summary><pre class="json">${esc(JSON.stringify(item.result, null, 2))}</pre></details>`);
+    }
+    $("d-body").innerHTML = body.join("");
+  }
+
+  async function saveDrawer(approve) {
+    const body = $("d-body");
+    const fields = {};
+    body.querySelectorAll("[data-key]").forEach((el) => { fields[el.dataset.key] = el.value; });
+    const payload = { fields, approve };
+    const table = body.querySelector("table.lines");
+    if (table) {
+      payload.line_items = Array.from(table.tBodies[0].rows).map((tr) => {
+        const row = {};
+        tr.querySelectorAll("[data-col]").forEach((el) => { row[el.dataset.col] = el.value; });
+        return row;
+      });
+    }
+    body.querySelectorAll(".review-actions button").forEach((b) => (b.disabled = true));
+    try {
+      const response = await fetch(`/batch/${state.jobId}/item/${drawerIndex}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      renderDrawer(data, drawerIndex);
+      toast(approve ? "Đã duyệt hóa đơn." : "Đã lưu thay đổi.");
+      pollStatus();
+      loadResults();
+    } catch (err) {
+      body.querySelectorAll(".review-actions button").forEach((b) => (b.disabled = false));
+      toast(err.message);
+    }
+  }
+  $("d-body").addEventListener("click", (e) => {
+    if (e.target.closest("[data-del-row]")) e.target.closest("tr").remove();
+    else if (e.target.closest("#d-add-row")) {
+      const tbody = $("d-body").querySelector("table.lines tbody");
+      tbody.insertAdjacentHTML("beforeend", lineRowHtml(drawerSchema.line_fields, {}, -1, new Set(), new Set()));
+    } else if (e.target.closest("#d-save")) saveDrawer(false);
+    else if (e.target.closest("#d-approve")) saveDrawer(true);
+  });
+
+  $("d-delete").addEventListener("click", () => { if (drawerIndex !== null) deleteItem(drawerIndex); });
+
+  $("d-excel").addEventListener("click", () => {
+    if (state.jobId && drawerIndex !== null) window.location.href = `/batch/${state.jobId}/item/${drawerIndex}/excel`;
+  });
+
+  /* ---------- Init ---------- */
+  loadModels();
+  try {
+    const saved = localStorage.getItem("ocr-job-id");
+    if (saved) { state.jobId = saved; startPolling(); }
+  } catch (_) {}
+</script>
+</body>
+</html>

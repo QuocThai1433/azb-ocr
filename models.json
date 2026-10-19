@@ -1,0 +1,1110 @@
+[
+  {
+    "id": "31a18308",
+    "name": "A - HĐ GTGT điện tử",
+    "title": "HÓA ĐƠN GIÁ TRỊ GIA TĂNG",
+    "signatures": [
+      "NGƯỜI MUA HÀNG",
+      "NGƯỜI BÁN HÀNG"
+    ],
+    "fields": [
+      {
+        "key": "mau_so",
+        "label": "Mẫu số",
+        "type": "text",
+        "hint": "Góc phải phía trên, sau chữ \"Mẫu số\"",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "ky_hieu",
+        "label": "Ký hiệu",
+        "type": "text",
+        "hint": "Góc phải phía trên, sau chữ \"Ký hiệu\"",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "so_hoa_don",
+        "label": "Số hóa đơn",
+        "type": "text",
+        "hint": "Số màu đỏ ở góc phải phía trên, giữ nguyên các số 0 ở đầu",
+        "zone": "top_right",
+        "required": true
+      },
+      {
+        "key": "ngay_lap",
+        "label": "Ngày lập",
+        "type": "date",
+        "hint": "Dòng \"Ngày .. tháng .. năm ..\" dưới tiêu đề",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "ten_nguoi_ban",
+        "label": "Tên người bán",
+        "type": "text",
+        "hint": "Tên công ty ở đầu hóa đơn, cạnh logo",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "dia_chi_nguoi_ban",
+        "label": "Địa chỉ người bán",
+        "type": "text",
+        "hint": "Dưới tên công ty người bán",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_ban",
+        "label": "Mã số thuế người bán",
+        "type": "text",
+        "hint": "Dưới tên công ty người bán",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "dien_thoai_nguoi_ban",
+        "label": "Điện thoại người bán",
+        "type": "text",
+        "hint": "Dưới tên công ty người bán",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "tai_khoan_ngan_hang_nguoi_ban",
+        "label": "Tài khoản ngân hàng người bán",
+        "type": "text",
+        "hint": "Sau chữ STK, ghi cả tên ngân hàng như trên hóa đơn",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ho_ten_nguoi_mua",
+        "label": "Họ tên người mua",
+        "type": "text",
+        "hint": "Dòng \"Họ tên người mua hàng\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ten_don_vi_mua",
+        "label": "Tên đơn vị mua",
+        "type": "text",
+        "hint": "Dòng \"Tên đơn vị\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_mua",
+        "label": "Mã số thuế người mua",
+        "type": "text",
+        "hint": "Trong khối thông tin người mua",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "dia_chi_nguoi_mua",
+        "label": "Địa chỉ người mua",
+        "type": "text",
+        "hint": "Trong khối thông tin người mua",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_trinh_hop_dong",
+        "label": "Công trình / Hợp đồng",
+        "type": "text",
+        "hint": "Dòng \"Công trình / Hợp đồng\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "hinh_thuc_thanh_toan",
+        "label": "Hình thức thanh toán",
+        "type": "text",
+        "hint": "Dòng \"Hình thức thanh toán\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_tien_hang",
+        "label": "Cộng tiền hàng",
+        "type": "money",
+        "hint": "Dưới bảng hàng hóa",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "thue_suat_gtgt",
+        "label": "Thuế suất GTGT",
+        "type": "percent",
+        "hint": "Dòng \"Thuế suất GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_thue_gtgt",
+        "label": "Tiền thuế GTGT",
+        "type": "money",
+        "hint": "Cùng dòng với thuế suất",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tong_tien_thanh_toan",
+        "label": "Tổng tiền thanh toán",
+        "type": "money",
+        "hint": "Dòng \"Tổng cộng tiền thanh toán\"",
+        "zone": "totals",
+        "required": true
+      },
+      {
+        "key": "so_tien_bang_chu",
+        "label": "Số tiền bằng chữ",
+        "type": "text",
+        "hint": "Sau chữ \"Số tiền viết bằng chữ\"",
+        "zone": "footer",
+        "required": false
+      },
+      {
+        "key": "trang_thai_chu_ky_so",
+        "label": "Trạng thái chữ ký số",
+        "type": "text",
+        "hint": "Tiêu đề khung chữ ký màu xanh lá, ví dụ Signature Valid",
+        "zone": "bottom",
+        "required": false
+      },
+      {
+        "key": "nguoi_ky",
+        "label": "Người ký",
+        "type": "text",
+        "hint": "Sau chữ \"Ký bởi\" trong khung chữ ký",
+        "zone": "bottom",
+        "required": false
+      },
+      {
+        "key": "ngay_gio_ky",
+        "label": "Ngày giờ ký",
+        "type": "text",
+        "hint": "Sau chữ \"Ký ngày\" trong khung chữ ký",
+        "zone": "bottom",
+        "required": false
+      },
+      {
+        "key": "ma_tra_cuu",
+        "label": "Mã tra cứu",
+        "type": "text",
+        "hint": "Dòng cuối trang, sau chữ \"Mã tra cứu\"",
+        "zone": "bottom",
+        "required": false
+      },
+      {
+        "key": "website_tra_cuu",
+        "label": "Website tra cứu",
+        "type": "text",
+        "hint": "Dòng cuối trang, sau chữ \"Tra cứu tại\"",
+        "zone": "bottom",
+        "required": false
+      }
+    ],
+    "line_fields": [
+      {
+        "key": "stt",
+        "label": "STT",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "ten_hang_hoa_dich_vu",
+        "label": "Tên hàng hóa, dịch vụ",
+        "type": "text",
+        "hint": "",
+        "required": true
+      },
+      {
+        "key": "dvt",
+        "label": "ĐVT",
+        "type": "text",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "so_luong",
+        "label": "Số lượng",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "don_gia",
+        "label": "Đơn giá",
+        "type": "money",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "thanh_tien",
+        "label": "Thành tiền",
+        "type": "money",
+        "hint": "",
+        "required": true
+      }
+    ],
+    "notes": ""
+  },
+  {
+    "id": "10540c97",
+    "name": "B - Phiếu giao hàng in kim",
+    "title": "PHIẾU GIAO HÀNG KIÊM HÓA ĐƠN",
+    "signatures": [
+      "NGƯỜI NHẬN HÀNG",
+      "THỦ KHO",
+      "NGƯỜI GIAO HÀNG"
+    ],
+    "fields": [
+      {
+        "key": "so_phieu",
+        "label": "Số phiếu",
+        "type": "text",
+        "hint": "Sau chữ \"Số:\" dưới tiêu đề",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "ngay",
+        "label": "Ngày",
+        "type": "date",
+        "hint": "Sau chữ \"Ngày\" dưới tiêu đề",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "ten_nguoi_ban",
+        "label": "Tên người bán",
+        "type": "text",
+        "hint": "Tên công ty ở đầu phiếu",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "dia_chi_nguoi_ban",
+        "label": "Địa chỉ người bán",
+        "type": "text",
+        "hint": "Sau \"Đ/c:\" ở đầu phiếu",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_ban",
+        "label": "Mã số thuế người bán",
+        "type": "text",
+        "hint": "Sau \"MST:\" ở đầu phiếu",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "dien_thoai_nguoi_ban",
+        "label": "Điện thoại người bán",
+        "type": "text",
+        "hint": "Sau \"ĐT:\" ở đầu phiếu",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ten_khach_hang",
+        "label": "Tên khách hàng",
+        "type": "text",
+        "hint": "Dòng \"Khách hàng\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_khach_hang",
+        "label": "Mã số thuế khách hàng",
+        "type": "text",
+        "hint": "Dòng \"MST\" của khách hàng",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "dia_chi_khach_hang",
+        "label": "Địa chỉ khách hàng",
+        "type": "text",
+        "hint": "Dòng \"Địa chỉ\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_trinh",
+        "label": "Công trình",
+        "type": "text",
+        "hint": "Dòng \"Công trình\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "nguoi_nhan",
+        "label": "Người nhận",
+        "type": "text",
+        "hint": "Dòng \"Người nhận\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "bien_so_xe",
+        "label": "Biển số xe",
+        "type": "text",
+        "hint": "Dòng \"Biển số xe\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "hinh_thuc_thanh_toan",
+        "label": "Hình thức thanh toán",
+        "type": "text",
+        "hint": "Sau chữ \"HTTT\" cùng dòng biển số xe",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_tien_hang",
+        "label": "Cộng tiền hàng",
+        "type": "money",
+        "hint": "Dưới bảng hàng hóa",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "thue_suat_gtgt",
+        "label": "Thuế suất GTGT",
+        "type": "percent",
+        "hint": "Số trong ngoặc sau \"Thuế GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_thue_gtgt",
+        "label": "Tiền thuế GTGT",
+        "type": "money",
+        "hint": "Dòng \"Thuế GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tong_thanh_toan",
+        "label": "Tổng thanh toán",
+        "type": "money",
+        "hint": "Dòng \"TỔNG THANH TOÁN\"",
+        "zone": "totals",
+        "required": true
+      },
+      {
+        "key": "so_tien_bang_chu",
+        "label": "Số tiền bằng chữ",
+        "type": "text",
+        "hint": "Sau chữ \"Bằng chữ\"",
+        "zone": "footer",
+        "required": false
+      }
+    ],
+    "line_fields": [
+      {
+        "key": "stt",
+        "label": "STT",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "ten_hang",
+        "label": "Tên hàng",
+        "type": "text",
+        "hint": "Tên dài có thể xuống dòng, nối lại thành một tên",
+        "required": true
+      },
+      {
+        "key": "dvt",
+        "label": "ĐVT",
+        "type": "text",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "so_luong",
+        "label": "Số lượng",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "don_gia",
+        "label": "Đơn giá",
+        "type": "money",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "thanh_tien",
+        "label": "Thành tiền",
+        "type": "money",
+        "hint": "",
+        "required": true
+      }
+    ],
+    "notes": "Phiếu in kim chữ đều nhau trên giấy có lỗ kéo hai bên: bỏ qua các lỗ tròn ở mép và các dòng gạch ===== và -----. Tên hàng dài có thể xuống dòng mà không có STT riêng: nối vào món hàng phía trên."
+  },
+  {
+    "id": "32a70716",
+    "name": "C - Bill bán lẻ nhiệt",
+    "title": "HÓA ĐƠN BÁN LẺ",
+    "signatures": [],
+    "fields": [
+      {
+        "key": "so_hoa_don",
+        "label": "Số hóa đơn",
+        "type": "text",
+        "hint": "Sau chữ \"Số:\" dưới tiêu đề HÓA ĐƠN BÁN LẺ",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "ngay",
+        "label": "Ngày",
+        "type": "date",
+        "hint": "Sau chữ \"Ngày:\"",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "gio",
+        "label": "Giờ",
+        "type": "text",
+        "hint": "Sau chữ \"Giờ:\", định dạng HH:MM",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ten_cua_hang",
+        "label": "Tên cửa hàng",
+        "type": "text",
+        "hint": "Đầu bill, dòng in đậm",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "dia_chi_cua_hang",
+        "label": "Địa chỉ cửa hàng",
+        "type": "text",
+        "hint": "Dưới tên cửa hàng, nối các dòng bị xuống dòng",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_cua_hang",
+        "label": "Mã số thuế cửa hàng",
+        "type": "text",
+        "hint": "Sau \"MST:\" ở đầu bill",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "dien_thoai_cua_hang",
+        "label": "Điện thoại cửa hàng",
+        "type": "text",
+        "hint": "Sau \"ĐT:\" ở đầu bill",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "quay",
+        "label": "Quầy",
+        "type": "text",
+        "hint": "Sau chữ \"Quầy\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "nhan_vien",
+        "label": "Nhân viên",
+        "type": "text",
+        "hint": "Sau chữ \"NV:\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "khach_hang",
+        "label": "Khách hàng",
+        "type": "text",
+        "hint": "Sau \"KH:\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_khach_hang",
+        "label": "Mã số thuế khách hàng",
+        "type": "text",
+        "hint": "Sau \"MST KH:\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_trinh",
+        "label": "Công trình",
+        "type": "text",
+        "hint": "Sau \"CT:\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_tien_hang",
+        "label": "Cộng tiền hàng",
+        "type": "money",
+        "hint": "Dòng \"Cộng tiền hàng\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "thue_suat_gtgt",
+        "label": "Thuế suất GTGT",
+        "type": "percent",
+        "hint": "Số sau chữ \"Thuế GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_thue_gtgt",
+        "label": "Tiền thuế GTGT",
+        "type": "money",
+        "hint": "Dòng \"Thuế GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tong_cong",
+        "label": "Tổng cộng",
+        "type": "money",
+        "hint": "Dòng \"TỔNG CỘNG\" in đậm",
+        "zone": "totals",
+        "required": true
+      },
+      {
+        "key": "tien_khach_dua",
+        "label": "Tiền khách đưa",
+        "type": "money",
+        "hint": "Dòng \"Tiền khách đưa\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_thua",
+        "label": "Tiền thừa",
+        "type": "money",
+        "hint": "Dòng \"Tiền thừa\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "ma_duoi_ma_vach",
+        "label": "Mã dưới mã vạch",
+        "type": "text",
+        "hint": "Dòng chữ nhỏ ngay dưới mã vạch ở cuối bill",
+        "zone": "bottom",
+        "required": false
+      }
+    ],
+    "line_fields": [
+      {
+        "key": "stt",
+        "label": "STT",
+        "type": "number",
+        "hint": "Bill không có cột STT, hãy tự đánh số từ 1",
+        "required": false
+      },
+      {
+        "key": "ten_hang",
+        "label": "Tên hàng",
+        "type": "text",
+        "hint": "Dòng đầu của mỗi món hàng",
+        "required": true
+      },
+      {
+        "key": "so_luong",
+        "label": "Số lượng",
+        "type": "number",
+        "hint": "Số ở đầu dòng thứ hai của món, có thể có số thập phân như 44,6",
+        "required": false
+      },
+      {
+        "key": "dvt",
+        "label": "ĐVT",
+        "type": "text",
+        "hint": "Chữ ngay sau số lượng, ví dụ con, kg, cuộn",
+        "required": false
+      },
+      {
+        "key": "don_gia",
+        "label": "Đơn giá",
+        "type": "money",
+        "hint": "Số sau dấu x ở dòng thứ hai",
+        "required": false
+      },
+      {
+        "key": "thanh_tien",
+        "label": "Thành tiền",
+        "type": "money",
+        "hint": "Số ở mép phải, cột \"T.Tiền\"",
+        "required": true
+      }
+    ],
+    "notes": "Bill nhiệt hẹp: mỗi món hàng có hai dòng. Dòng 1 là tên hàng. Dòng 2 có dạng 'số lượng đơn vị x đơn giá' và thành tiền nằm ở mép phải."
+  },
+  {
+    "id": "7d3dca37",
+    "name": "D - HĐ bán hàng ngang",
+    "title": "HÓA ĐƠN BÁN HÀNG",
+    "signatures": [],
+    "fields": [
+      {
+        "key": "so_hoa_don",
+        "label": "Số hóa đơn",
+        "type": "text",
+        "hint": "Dòng \"Số HĐ\" trong khung thông tin bên phải",
+        "zone": "top_right",
+        "required": true
+      },
+      {
+        "key": "ky_hieu",
+        "label": "Ký hiệu",
+        "type": "text",
+        "hint": "Dòng \"Ký hiệu\" trong khung thông tin bên phải",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "ngay_lap",
+        "label": "Ngày lập",
+        "type": "date",
+        "hint": "Dòng \"Ngày lập\" trong khung thông tin bên phải",
+        "zone": "top_right",
+        "required": true
+      },
+      {
+        "key": "han_thanh_toan",
+        "label": "Hạn thanh toán",
+        "type": "date",
+        "hint": "Dòng \"Hạn thanh toán\" trong khung thông tin bên phải",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "hinh_thuc_thanh_toan",
+        "label": "Hình thức thanh toán",
+        "type": "text",
+        "hint": "Dòng \"HT thanh toán\"",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "cong_trinh",
+        "label": "Công trình",
+        "type": "text",
+        "hint": "Mục \"Công trình\" cuối khung thông tin bên phải",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "ten_nguoi_ban",
+        "label": "Tên người bán",
+        "type": "text",
+        "hint": "Dưới tiêu đề NGƯỜI BÁN, nối các dòng bị xuống dòng",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "dia_chi_nguoi_ban",
+        "label": "Địa chỉ người bán",
+        "type": "text",
+        "hint": "Dưới tên người bán",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_ban",
+        "label": "Mã số thuế người bán",
+        "type": "text",
+        "hint": "Dưới địa chỉ người bán",
+        "zone": "top_left",
+        "required": true
+      },
+      {
+        "key": "hotline_nguoi_ban",
+        "label": "Hotline người bán",
+        "type": "text",
+        "hint": "Trong dải màu xanh trên cùng, dưới tên công ty",
+        "zone": "top_left",
+        "required": false
+      },
+      {
+        "key": "ten_nguoi_mua",
+        "label": "Tên người mua",
+        "type": "text",
+        "hint": "Dưới tiêu đề NGƯỜI MUA",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "dia_chi_nguoi_mua",
+        "label": "Địa chỉ người mua",
+        "type": "text",
+        "hint": "Dưới tên người mua",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_mua",
+        "label": "Mã số thuế người mua",
+        "type": "text",
+        "hint": "Dưới địa chỉ người mua",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "nguoi_dat_hang",
+        "label": "Người đặt hàng",
+        "type": "text",
+        "hint": "Dòng \"Người đặt\" trong khối NGƯỜI MUA",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "tam_tinh",
+        "label": "Tạm tính",
+        "type": "money",
+        "hint": "Dòng \"Tạm tính\" ở dưới bên phải, bỏ chữ đ",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "thue_suat_vat",
+        "label": "Thuế suất VAT",
+        "type": "percent",
+        "hint": "Số trong ngoặc ở dòng \"VAT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_vat",
+        "label": "Tiền VAT",
+        "type": "money",
+        "hint": "Dòng \"VAT\" ở dưới bên phải, bỏ chữ đ",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tong_thanh_toan",
+        "label": "Tổng thanh toán",
+        "type": "money",
+        "hint": "Dòng \"TỔNG THANH TOÁN\" nền xanh, bỏ chữ đ",
+        "zone": "totals",
+        "required": true
+      },
+      {
+        "key": "so_tien_bang_chu",
+        "label": "Số tiền bằng chữ",
+        "type": "text",
+        "hint": "Dưới chữ \"Bằng chữ\" ở dưới bên trái",
+        "zone": "footer",
+        "required": false
+      },
+      {
+        "key": "thong_tin_chuyen_khoan",
+        "label": "Thông tin chuyển khoản",
+        "type": "text",
+        "hint": "Dưới \"Thông tin chuyển khoản\", ghi như trên hóa đơn",
+        "zone": "footer",
+        "required": false
+      },
+      {
+        "key": "nguoi_lap_phieu",
+        "label": "Người lập phiếu",
+        "type": "text",
+        "hint": "Sau chữ \"Người lập phiếu\" ở cuối trang",
+        "zone": "footer",
+        "required": false
+      }
+    ],
+    "line_fields": [
+      {
+        "key": "stt",
+        "label": "STT",
+        "type": "number",
+        "hint": "Cột \"#\"",
+        "required": false
+      },
+      {
+        "key": "mo_ta_hang_hoa_dich_vu",
+        "label": "Mô tả hàng hóa / dịch vụ",
+        "type": "text",
+        "hint": "",
+        "required": true
+      },
+      {
+        "key": "dvt",
+        "label": "ĐVT",
+        "type": "text",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "so_luong",
+        "label": "Số lượng",
+        "type": "number",
+        "hint": "Cột \"SL\"",
+        "required": false
+      },
+      {
+        "key": "don_gia",
+        "label": "Đơn giá",
+        "type": "money",
+        "hint": "Bỏ đơn vị VNĐ",
+        "required": false
+      },
+      {
+        "key": "thanh_tien",
+        "label": "Thành tiền",
+        "type": "money",
+        "hint": "Bỏ đơn vị VNĐ",
+        "required": true
+      }
+    ],
+    "notes": "Số tiền ở phần tổng cuối trang có chữ đ ở cuối: bỏ chữ đ khi đọc."
+  },
+  {
+    "id": "e154d3c3",
+    "name": "E - HĐ GTGT scan nghiêng",
+    "title": "HÓA ĐƠN GIÁ TRỊ GIA TĂNG",
+    "signatures": [
+      "NGƯỜI MUA HÀNG",
+      "NGƯỜI BÁN HÀNG",
+      "THỦ TRƯỞNG ĐƠN VỊ"
+    ],
+    "fields": [
+      {
+        "key": "mau_so",
+        "label": "Mẫu số",
+        "type": "text",
+        "hint": "Góc trái phía trên, sau chữ \"Mẫu số\"",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "ky_hieu",
+        "label": "Ký hiệu",
+        "type": "text",
+        "hint": "Góc trái phía trên, sau chữ \"Ký hiệu\"",
+        "zone": "top_right",
+        "required": false
+      },
+      {
+        "key": "so_hoa_don",
+        "label": "Số hóa đơn",
+        "type": "text",
+        "hint": "Số màu đỏ ở góc phải phía trên, giữ nguyên các số 0 ở đầu",
+        "zone": "top_right",
+        "required": true
+      },
+      {
+        "key": "ngay_lap",
+        "label": "Ngày lập",
+        "type": "date",
+        "hint": "Dòng \"Ngày .. tháng .. năm ..\" dưới tiêu đề",
+        "zone": "subtitle",
+        "required": true
+      },
+      {
+        "key": "lien",
+        "label": "Liên",
+        "type": "text",
+        "hint": "Dòng nghiêng dưới tiêu đề, ví dụ Liên 2: Giao cho khách hàng",
+        "zone": "subtitle",
+        "required": false
+      },
+      {
+        "key": "ten_don_vi_ban",
+        "label": "Tên đơn vị bán",
+        "type": "text",
+        "hint": "Dòng \"Đơn vị bán hàng\", nối nếu bị xuống dòng",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_ban",
+        "label": "Mã số thuế người bán",
+        "type": "text",
+        "hint": "Dòng \"Mã số thuế\" thứ nhất",
+        "zone": "info",
+        "required": true
+      },
+      {
+        "key": "dia_chi_nguoi_ban",
+        "label": "Địa chỉ người bán",
+        "type": "text",
+        "hint": "Dòng \"Địa chỉ\" thứ nhất",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "so_tai_khoan_nguoi_ban",
+        "label": "Số tài khoản người bán",
+        "type": "text",
+        "hint": "Dòng \"Số tài khoản\", ghi cả tên ngân hàng",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ho_ten_nguoi_mua",
+        "label": "Họ tên người mua",
+        "type": "text",
+        "hint": "Dòng \"Họ tên người mua hàng\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ten_don_vi_mua",
+        "label": "Tên đơn vị mua",
+        "type": "text",
+        "hint": "Dòng \"Tên đơn vị\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "ma_so_thue_nguoi_mua",
+        "label": "Mã số thuế người mua",
+        "type": "text",
+        "hint": "Dòng \"Mã số thuế\" thứ hai",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "dia_chi_nguoi_mua",
+        "label": "Địa chỉ người mua",
+        "type": "text",
+        "hint": "Dòng \"Địa chỉ\" thứ hai",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_trinh",
+        "label": "Công trình",
+        "type": "text",
+        "hint": "Dòng \"Công trình\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "hinh_thuc_thanh_toan",
+        "label": "Hình thức thanh toán",
+        "type": "text",
+        "hint": "Dòng \"Hình thức thanh toán\"",
+        "zone": "info",
+        "required": false
+      },
+      {
+        "key": "cong_tien_hang",
+        "label": "Cộng tiền hàng",
+        "type": "money",
+        "hint": "Dưới bảng hàng hóa",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "thue_suat_gtgt",
+        "label": "Thuế suất GTGT",
+        "type": "percent",
+        "hint": "Dòng \"Thuế suất GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tien_thue_gtgt",
+        "label": "Tiền thuế GTGT",
+        "type": "money",
+        "hint": "Cùng dòng với thuế suất, sau chữ \"Tiền thuế GTGT\"",
+        "zone": "totals",
+        "required": false
+      },
+      {
+        "key": "tong_tien_thanh_toan",
+        "label": "Tổng tiền thanh toán",
+        "type": "money",
+        "hint": "Dòng \"Tổng cộng tiền thanh toán\"",
+        "zone": "totals",
+        "required": true
+      },
+      {
+        "key": "so_tien_bang_chu",
+        "label": "Số tiền bằng chữ",
+        "type": "text",
+        "hint": "Sau chữ \"Số tiền viết bằng chữ\"",
+        "zone": "footer",
+        "required": false
+      },
+      {
+        "key": "chu_tren_con_dau",
+        "label": "Chữ trên con dấu",
+        "type": "text",
+        "hint": "Tên công ty và MST in trong con dấu tròn màu đỏ ở cuối trang",
+        "zone": "bottom",
+        "required": false
+      }
+    ],
+    "line_fields": [
+      {
+        "key": "stt",
+        "label": "STT",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "ten_hang_hoa_dich_vu",
+        "label": "Tên hàng hóa, dịch vụ",
+        "type": "text",
+        "hint": "",
+        "required": true
+      },
+      {
+        "key": "dvt",
+        "label": "ĐVT",
+        "type": "text",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "so_luong",
+        "label": "Số lượng",
+        "type": "number",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "don_gia",
+        "label": "Đơn giá",
+        "type": "money",
+        "hint": "",
+        "required": false
+      },
+      {
+        "key": "thanh_tien",
+        "label": "Thành tiền",
+        "type": "money",
+        "hint": "",
+        "required": true
+      }
+    ],
+    "notes": "Ảnh scan bị nghiêng: đọc từng dòng theo đường nghiêng của nó, đừng nhầm với dòng bên cạnh. Chữ in đen là nhãn, chữ điền tay màu xanh là giá trị cần lấy. Con dấu đỏ đè lên chữ: bỏ qua, trừ trường 'Chữ trên con dấu'. Bỏ qua dòng ký hiệu cột 'A B C 1 2 3=1x2' và các dòng trống trong bảng. Tên dài có thể xuống dòng: nối lại (ví dụ 'NAM VI' + 'ỆT' = 'NAM VIỆT')."
+  }
+]
